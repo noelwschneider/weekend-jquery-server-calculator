@@ -73,6 +73,9 @@ let decimalShift = (object) => {
         // console.log('calcNumber property is:', object.calcNumber[i])
     }
     console.log('exiting decimalShift')
+
+    // This function is primarily for getting the numbers in the same relative place, but I can sneak in this return as well and use it later in doMath() to get my calculated number back to its correct scale
+    return 10 ** maxIndex
 }
 
 
@@ -247,7 +250,15 @@ let doMath = (object) => {
         // -4.1
     // I think this can be done easily with careful splicing
     
-    decimalShift(testObject)
+    // decimalShift ensures that only integers will be calculated on
+        // scalefixer holds an exponent of 10 that will divide the final integer back to the correct decimal place
+            // I could see this approach having consequences when exponents get involved
+                // I'm not math literate enough to know offhand if this is possible
+                // Upon further review, it's a big issue. I have two options:
+                    // Don't let the user do exponent stuff
+                    // Figure it out
+                        // You know, I just realized Math.round() is probably just as good and way simpler, AND doesn't give me the exponent problem
+    let scaleFixer = decimalShift(testObject)
     console.log('updated calcNumber property:', object.calcNumber)
     console.log('')
 
@@ -261,9 +272,10 @@ let doMath = (object) => {
     console.log('doing calculations after resolving parenthized arguments')
     console.log('current state of calculation:', calculation)
     calculation = orderOfOperations(calculation, object)
-    console.log('exiting doMath. Return value is:', calculation)
+    console.log('exiting doMath. Current value is:', calculation)
+    console.log('return value after dividing by scaleFixer', calculation/scaleFixer)
 
-    return calculation
+    return calculation / scaleFixer;
 }
 
 doMath(testObject)

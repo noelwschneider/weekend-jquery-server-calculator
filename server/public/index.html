@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="vendors/jquery.js"></script>
+    <script src="vendors/jquery-3.7.0.min.js"></script>
     <script src="scripts/client.js"></script>
     <link rel="stylesheet" type="text/css" href="styles/style.css">
     <title>Document</title>
@@ -14,34 +14,38 @@
         <div id="calculator-container">
             <input id="input-display" class="row-one">
             <button id="clear-btn" class="row-one column-four">C</button>
-            <button id="delete-btn"class="row-one column-five">&lt;</button>
+            <button id="delete-btn"class="row-one column-five">&lt;x</button>
             <button id="memory-add-btn" class="row-two column-one">M+</button>
             <button id="memory-subtract-btn" class="row-two column-two">M-</button>
             <button id="memory-store-btn" class="row-two column-three">MS</button>
             <button id="left-btn" class="row-two column-four">&lt;</button>
             <button id="right-btn" class="row-two column-five">&gt;</button>
-            <button id="7-btn" class="row-three column-one number-btn" value="7">7</button>
-            <button id="8-btn" class="row-three column-two number-btn" value="8">8</button>
+            <button id="7-btn" class="row-three column-one number-btn">7</button>
+            <button id="8-btn" class="row-three column-two number-btn">8</button>
             <button id="9-btn" class="row-three column-three number-btn">9</button>
             <button id="open-parenth-btn" class="row-three column-four">(</button>
             <button id="close-parent-btn"class="row-three column-five">)</button>
-            <button id="4-btn" class="row-four column-one number-btn" value="4">4</button>
-            <button id="5-btn" class="row-four column-two number-btn" value="5">5</button>
-            <button id="6-btn" class="row-four column-three number-btn" value="6">6</button>
+            <button id="4-btn" class="row-four column-one number-btn">4</button>
+            <button id="5-btn" class="row-four column-two number-btn">5</button>
+            <button id="6-btn" class="row-four column-three number-btn">6</button>
             <button id="multiply-btn" class="row-four column-four">X</button>
             <button id="divide-btn" class="row-four column-five">/</button>
-            <button id="1-btn" class="row-five column-one number-btn" value="1">1</button>
-            <button id="2-btn" class="row-five column-two number-btn" value="2">2</button>
-            <button id="3-btn" class="row-five column-three number-btn" value="3">3</button>
+            <button id="1-btn" class="row-five column-one number-btn">1</button>
+            <button id="2-btn" class="row-five column-two number-btn">2</button>
+            <button id="3-btn" class="row-five column-three number-btn">3</button>
             <button id="add-btn" class="row-five column-four">+</button>
             <button id="subtract-btn" class="row-five column-five">-</button>
             <button id="negative-btn" class="row-six column-one">+/-</button>
-            <button id="0-btn" class="row-six column-two number-btn" column-two>0</button>
-            <button id="decimal-btn" class="row-six column-three">.</button>
+            <button id="0-btn" class="row-six column-two number-btn">0</button>
+            <button id="decimal-btn" class="row-six column-three number-btn">.</button>
             <button id="submit-btn" class="row-six column-four">=</button>
             <button id="exponent-btn" class="row-six column-five">^</button>
         </div>
     </form>
+    <p id="error-message"></p>
+    <div id="calculation-display">
+        <!-- arguments to go here -->
+    </div>
     
 </body>
 </html>

@@ -2,14 +2,23 @@
     font-family:'Courier New', Courier, monospace
 }
 
+body {
+    background-color: gray;
+    height: 100vh;
+    width: 100vh;
+}
+
 #calculator-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(6, 1fr);
+    width: 50%;
+    margin: auto;
 }
 
 #input-display {
     grid-column: 1/3;
+    width: 100%;
 }
 
 .row-one {
@@ -34,4 +43,24 @@
 
 .row-six {
     grid-row: 6;
+}
+
+.column-one {
+    grid-column: 1;
+}
+
+.column-two {
+    grid-column: 2;
+}
+
+.column-three {
+    grid-column: 3;
+}
+
+.column-four {
+    grid-column: 4;
+}
+
+.column-five {
+    grid-column: 5;
 }

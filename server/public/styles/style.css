@@ -21,7 +21,6 @@ body {
     width: 100%;
 }
 
-/* Classes for setting grid positions */
 .row-one {
     grid-row: 1;
 }
@@ -64,20 +63,4 @@ body {
 
 .column-five {
     grid-column: 5;
-}
-
-
-/* Class for the currently-selected operator */
-.active-operator {
-    background-color: green;
-}
-
-/* Calculation display styling */
-
-.number-display {
-    display: inline;
-}
-
-.operator-display {
-    display: inline;
 }

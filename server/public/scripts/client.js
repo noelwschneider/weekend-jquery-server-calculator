@@ -5,7 +5,8 @@ $(document).ready(onReady)
 let serverPackage = {
     number: [],
     operator: [],
-    parentheses: []
+    parentheses: [],
+    answer: 
 }
 
 // Variable to hold information about the most recently selected button
@@ -292,6 +293,8 @@ function getAnswer() {
     }).then((response) => {
         console.log('in client-side GET', response)
         // Put get function here
+            // Update the DOM
+
     }).catch((error) => {
         console.log('client-side GET error catch', error)
         // alert('error with GET')

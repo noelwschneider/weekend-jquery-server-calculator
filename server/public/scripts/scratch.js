@@ -25,7 +25,7 @@ let calculation = {
     //   20.00   =
     //   23.95
 let testObject = {
-    number: [15, 245, 20],
+    number: [1.5, 2.45, 20],
     /**
      * visualize the shift as:
      *                                     dec     max -
@@ -39,9 +39,7 @@ let testObject = {
         * Then divide the result by the max shift?
         *   - Test that this works for multiplication
      * */ 
-    decimal: [1, 2, 0],
-    calcNumber: [],
-    operator: ['+', '+'],
+    operator: ['+', '*'],
     // Nested arrays to indicate placement of parentheses
         // first index: opening parenth goes /before/ this index in the number array
         // second index: closing parenth goes /after/ this index
@@ -85,12 +83,12 @@ let getCalcAsArray = (object) => {
     console.log('in getCalcAsArray')
     let calculation = []
     // Pushing the first number to the array because it will always begin and end with a number
-    calculation.push(object.calcNumber[0])
+    calculation.push(object.number[0])
     // For loop to get calcNumbers and operators into an array
         // middle argument is -1 because we don't want it to run
     for(i=0; i < object.operator.length; i++) {
         calculation.push(object.operator[i])
-        calculation.push(object.calcNumber[i+1])
+        calculation.push(object.number[i+1])
     }
     // console.log(calculation)
     console.log('exiting getCalcAsArray')
@@ -236,8 +234,6 @@ let calculationDoer = (calculation, operator) => {
 let doMath = (object) => {
     console.log('in doMath')
     console.log('number property:', object.number)
-    console.log('decimal property:', object.decimal)
-    console.log('calcNumber property:', object.calcNumber)
     console.log('operator property:', object.operator)
     console.log('parentheses property:', object.parentheses)
     console.log('')
@@ -258,9 +254,9 @@ let doMath = (object) => {
                     // Don't let the user do exponent stuff
                     // Figure it out
                         // You know, I just realized Math.round() is probably just as good and way simpler, AND doesn't give me the exponent problem
-    let scaleFixer = decimalShift(testObject)
-    console.log('updated calcNumber property:', object.calcNumber)
-    console.log('')
+    // let scaleFixer = decimalShift(testObject)
+    // console.log('updated calcNumber property:', object.calcNumber)
+    // console.log('')
 
     let calculation = getCalcAsArray(object)
     
@@ -273,9 +269,8 @@ let doMath = (object) => {
     console.log('current state of calculation:', calculation)
     calculation = orderOfOperations(calculation, object)
     console.log('exiting doMath. Current value is:', calculation)
-    console.log('return value after dividing by scaleFixer', calculation/scaleFixer)
 
-    return calculation / scaleFixer;
+    return calculation;
 }
 
 doMath(testObject)

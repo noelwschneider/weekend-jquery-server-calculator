@@ -61,10 +61,10 @@ function numberBtn(event){
         if ($('#close-parenth-btn').hasClass('active-operator')) {
             openParenthCount--
             // For loop to find the last unresolved parenthesis and close it
-            for (let i = serverPackage.parentheses.length; i > 0; i--) {
+            for (let i = serverPackage.parentheses.length - 1; i > 0; i--) {
                 if (serverPackage.parentheses[i].length == 1) {
                     serverPackage.parentheses[i].push(argumentDisplayCount)
-                    return
+                    return // Is this return leaving the for loop, or the whole function?
                 }
             }
         }
@@ -218,7 +218,11 @@ function submitBtn() {
 
     // Code to resolve any remaining open parentheses
     if (openParenthCount > 0) {
-        for (let i = serverPackage.parentheses.length; i > 0; i--) {
+        console.log(serverPackage.parentheses)
+        console.log(serverPackage.parentheses.length)
+        for (let i = serverPackage.parentheses.length - 1; i > 0; i--) {
+            console.log(serverPackage.parentheses[i])
+            console.log(serverPackage.parentheses[i].length)
             if (serverPackage.parentheses[i].length == 1) {
                 serverPackage.parentheses[i].push(argumentDisplayCount)
             }
@@ -260,15 +264,38 @@ function submitBtn() {
     $('#solution-display').append(calculation)
     $('#calculation-display').empty()
 
-
     // Post function here
+    $.ajax({
+        method: "POST",
+        url: "/submitcalculation",
+        data: serverPackage
+    }).then((response) => {
+        console.log('in client-side POST', response)
+    }).catch((error) => {
+        console.log('error with post request', error)
+        // alert('Error with POST')
+    })
 
     // Get function here
-
+    getAnswer()
     // Clear out object
     serverPackage.number = []
     serverPackage.operator = []
     serverPackage.parentheses = []
+}
+
+// GET FUNCTION
+function getAnswer() {
+    $.ajax({
+        method: "GET",
+        url: "/getanswer"
+    }).then((response) => {
+        console.log('in client-side GET', response)
+        // Put get function here
+    }).catch((error) => {
+        console.log('client-side GET error catch', error)
+        // alert('error with GET')
+    })
 }
 
 // HELPER FUNCTIONS

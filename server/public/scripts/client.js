@@ -15,14 +15,20 @@ let lastClicked = {
     type: ''
 }
 
+// Variable for counting the number of arguments and operators currently shown in the calculation display area
+let argumentDisplayCount = 0
+
+// Variable for counting unresolved parentheses
+let openParenthCount = 0
 
 
+// ON-READY FUNCTION
 function onReady() {
     console.log('in onReady')
 
     // Listener functions
-    //$('.number-btn').on('click', numberBtn)
     $('.number-btn').on('click', numberBtn)
+    $('.operator-btn').on('click', operatorBtn)
 }
 
 // FUNCTIONS
@@ -37,9 +43,16 @@ function numberBtn(event){
     let clickedChar = $(this).text()
 
     // Conditional to send input screen value to the calculation display if the last button clicked was an operator
-    if(lastClicked.type == operator) {
+    if(lastClicked.type == 'operator') {
         serverPackage.number.push(inputScreen)
         serverPackage.operator.push(lastClicked.value)
+        $('#calculation-display').append(`
+            <p id="number-display-${argumentDisplayCount}" class="number-display">${inputScreen}</p>
+            <p id="operator-display-${argumentDisplayCount}" class="operator-display">${lastClicked.value}</p>
+        `)
+        $('.active-operator').removeClass('active-operator')
+        argumentDisplayCount++
+        inputScreen = ''
     }
 
     // Validation to reject a second decimal point
@@ -55,7 +68,7 @@ function numberBtn(event){
 
     $('#error-message').text('')
     inputScreen += clickedChar
-    console.log(inputScreen)
+    // console.log(inputScreen)
     $('#input-display').val(inputScreen)
 
     // Updating the status of lastClicked
@@ -63,7 +76,24 @@ function numberBtn(event){
     lastClicked.value = clickedChar
 }
 
+// Handler function for operator buttons
+function operatorBtn(event) {
+    event.preventDefault()
 
+    let clickedChar = $(this).text()
+
+    // Conditional to select/unselect active operator
+    if ($(this).hasClass('active-operator')) {
+        $(this).removeClass('active-operator')
+        lastClicked.type = ''
+        lastClicked.value = ''
+    } else {
+        $('.operator-btn').removeClass('active-operator')
+        $(this).addClass('active-operator')
+        lastClicked.type = 'operator'
+        lastClicked.value = clickedChar
+    }
+}
 
 
 

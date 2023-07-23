@@ -48,7 +48,7 @@ function numberBtn(event){
     let clickedChar = $(this).text()
 
     // Conditional to send input screen value to the calculation display if the last button clicked was an operator
-    if(lastClicked.type == 'operator') {
+    if (lastClicked.type == 'operator') {
         // Clearing uneeded tailing decimal
         inputScreen = decimalTailCheck(inputScreen)
 
@@ -59,8 +59,14 @@ function numberBtn(event){
             $('#open-parenth-btn').removeClass('active-operator')
         }
         if ($('#close-parenth-btn').hasClass('active-operator')) {
-
             openParenthCount--
+            // For loop to find the last unresolved parenthesis and close it
+            for (let i = serverPackage.parentheses.length; i > 0; i--) {
+                if (serverPackage.parentheses[i].length == 1) {
+                    serverPackage.parentheses[i].push(argumentDisplayCount)
+                    return
+                }
+            }
         }
 
         // Pushing number and operator to server package
@@ -145,6 +151,10 @@ function clearBtn() {
     } else {
         $('#input-display').val('')
     }
+
+    $('#error-message').text('')
+    $('.operator-btn').removeClass('active-operator')
+    $('.parenth-btn').removeClass('active-operator')
 }
 
 function deleteBtn() {
@@ -153,9 +163,6 @@ function deleteBtn() {
 }
 
 function openParenthBtn() {
-    // Validation to avoid a closing parenth if there isn't an open parenth
-    
-
     if ($(this).hasClass('active-operator')) {
         $(this).removeClass('active-operator')
     } else {
@@ -169,6 +176,7 @@ function openParenthBtn() {
 
 function closeParenthBtn() {
     if (openParenthCount == 0) {
+        $('#error-message').text('Open parenthesis required before closing parenthesis can be used')
         return
     } 
 
@@ -185,6 +193,44 @@ function closeParenthBtn() {
 
 function submitBtn() {
     console.log('in submitBtn')
+    
+    let inputScreen = $('#input-display').val()
+    // Validation to prevent submitting without at least one operator
+    if (serverPackage.operator.length == 0) {
+        $('#error-message').text('Please include at least two numbers and one operator before submitting')
+        return
+    }
+
+    // Validation for active operator
+    if ($('.operator-btn').hasClass('active-operator')) {
+        $('#error-message').text('Please resolve active operator button')
+        return
+    }
+
+    // Validation to prevent submitting without number
+        // Maybe include setting to automatically:
+            // use 0 if last operator was + or -
+            // use 1 if last operator was *, /, or ^
+    if (inputScreen == '') {
+        $('#error-message').text('Please input a number before submitting')
+        return
+    }
+
+    // Code to resolve any remaining open parentheses
+    if (openParenthCount > 0) {
+        for (let i = serverPackage.parentheses.length; i > 0; i--) {
+            if (serverPackage.parentheses[i].length == 1) {
+                serverPackage.parentheses[i].push(argumentDisplayCount)
+            }
+        }
+    }
+    $('#error-message').text('All open parentheses automatically resolved')
+
+    serverPackage.number.push($('#input-display').val())
+    
+    console.log('number property:', serverPackage.number)
+    console.log('operator property:', serverPackage.operator)
+    console.log('parentheses property:', serverPackage.parentheses)
 
     /**
      * If the input display is a number, add it to the serverPackage and get the ball rolling on the server-side stuff
@@ -194,8 +240,35 @@ function submitBtn() {
      * 
      * If the last clicked button was decimal, clear it before submitting
      * 
+     * If there is an active operator, return an error
+     *    Eventually, include a setting to ignore it
+     * 
      * I should probably increment argumentDisplayCount, but I'm not sure it's likely to be used for anything after the submit
      */
+
+    // Clearing out temporary data holders
+    $('#input-display').val('')
+    $('#error-message').text('')
+    openParenthCount = 0
+    argumentDisplayCount = 0
+
+    // Updating Calculation and Solution displays
+    $('#calculation-display').append(`
+            <p id="number-display-${argumentDisplayCount}" class="number-display">${inputScreen}</p>
+        `)
+    let calculation = $('#calculation-display').html()
+    $('#solution-display').append(calculation)
+    $('#calculation-display').empty()
+
+
+    // Post function here
+
+    // Get function here
+
+    // Clear out object
+    serverPackage.number = []
+    serverPackage.operator = []
+    serverPackage.parentheses = []
 }
 
 // HELPER FUNCTIONS

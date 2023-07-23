@@ -29,6 +29,8 @@ function onReady() {
     // Listener functions
     $('.number-btn').on('click', numberBtn)
     $('.operator-btn').on('click', operatorBtn)
+    $('#clear-btn').on('click', clearBtn)
+    $('#submit-btn').on('click', submitBtn)
 }
 
 // FUNCTIONS
@@ -61,9 +63,13 @@ function numberBtn(event){
         return
     }
 
-    // Validation to reject leading zeros
-    if (clickedChar == '0' && inputScreen == "") {
+    // Validation to reject multiple leading zeros
+    if (clickedChar == '0' && inputScreen == "0") {
         return
+    }
+    // Validation to clear leading zero if another number is selected
+    if (inputScreen == '0' && clickedChar !== '.') {
+        inputScreen = ''
     }
 
     $('#error-message').text('')
@@ -95,5 +101,22 @@ function operatorBtn(event) {
     }
 }
 
+function clearBtn() {
+    // if...else to clear entire calculation if input display is empty, or clear the display screen if it is not empty
+        // There should be a user confirmation so it's not just an auto delete
+        // And a setting to disable that
+    if ($('#input-display').val() === '') {
+        $('#calculation-display').empty()
+        serverPackage.number = []
+        serverPackage.operator = []
+        serverPackage.parentheses = []
+    } else {
+        $('#input-display').val('')
+    }
+}
 
+function submitBtn() {
+    console.log('in submitBtn')
 
+    
+}

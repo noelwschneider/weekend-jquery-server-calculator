@@ -31,6 +31,9 @@ function onReady() {
     $('.operator-btn').on('click', operatorBtn)
     $('#clear-btn').on('click', clearBtn)
     $('#submit-btn').on('click', submitBtn)
+    $('#delete-btn').on('click', deleteBtn)
+    $('#open-parenth-btn').on('click', openParenthBtn)
+    $('#close-parenth-btn').on('click', closeParenthBtn)
 }
 
 // FUNCTIONS
@@ -46,17 +49,38 @@ function numberBtn(event){
 
     // Conditional to send input screen value to the calculation display if the last button clicked was an operator
     if(lastClicked.type == 'operator') {
+        // Clearing uneeded tailing decimal
+        inputScreen = decimalTailCheck(inputScreen)
+
+        // Checking for parentheses
+        if ($('#open-parenth-btn').hasClass('active-operator')) {
+            openParenthCount++
+            serverPackage.parentheses.push([argumentDisplayCount])
+            $('#open-parenth-btn').removeClass('active-operator')
+        }
+        if ($('#close-parenth-btn').hasClass('active-operator')) {
+
+            openParenthCount--
+        }
+
+        // Pushing number and operator to server package
         serverPackage.number.push(inputScreen)
         serverPackage.operator.push(lastClicked.value)
+
+        // Updating display section
         $('#calculation-display').append(`
             <p id="number-display-${argumentDisplayCount}" class="number-display">${inputScreen}</p>
             <p id="operator-display-${argumentDisplayCount}" class="operator-display">${lastClicked.value}</p>
         `)
         $('.active-operator').removeClass('active-operator')
+
+        // Updating argument display counter
         argumentDisplayCount++
+
+        // Clearing input screen
         inputScreen = ''
     }
-
+    
     // Validation to reject a second decimal point
     if (clickedChar == "." && inputScreen.includes(".") == true ) {
         $('#error-message').text("Input cannot include multiple decimal points")
@@ -67,6 +91,12 @@ function numberBtn(event){
     if (clickedChar == '0' && inputScreen == "0") {
         return
     }
+
+    // Validation to reject consecutive decimal points
+    if (clickedChar == '.' && lastClicked == '.') {
+        return
+    }
+
     // Validation to clear leading zero if another number is selected
     if (inputScreen == '0' && clickedChar !== '.') {
         inputScreen = ''
@@ -82,7 +112,7 @@ function numberBtn(event){
     lastClicked.value = clickedChar
 }
 
-// Handler function for operator buttons
+// HANDLER FUNCTIONS
 function operatorBtn(event) {
     event.preventDefault()
 
@@ -110,13 +140,72 @@ function clearBtn() {
         serverPackage.number = []
         serverPackage.operator = []
         serverPackage.parentheses = []
+        argumentDisplayCount = 0
+        openParenthCount = 0
     } else {
         $('#input-display').val('')
+    }
+}
+
+function deleteBtn() {
+    let string = clearLastChar($('#input-display').val())
+    $('#input-display').val(string)
+}
+
+function openParenthBtn() {
+    // Validation to avoid a closing parenth if there isn't an open parenth
+    
+
+    if ($(this).hasClass('active-operator')) {
+        $(this).removeClass('active-operator')
+    } else {
+        $(this).addClass('active-operator')
+    }
+
+    if ($('#close-parenth-btn').hasClass('active-operator')) {
+        $('#close-parenth-btn').removeClass('active-operator')    
+    }
+}
+
+function closeParenthBtn() {
+    if (openParenthCount == 0) {
+        return
+    } 
+
+    if ($(this).hasClass('active-operator')) {
+        $(this).removeClass('active-operator')
+    } else {
+        $(this).addClass('active-operator')
+    }
+
+    if ($('#open-parenth-btn').hasClass('active-operator')) {
+        $('#open-parenth-btn').removeClass('active-operator')    
     }
 }
 
 function submitBtn() {
     console.log('in submitBtn')
 
-    
+    /**
+     * If the input display is a number, add it to the serverPackage and get the ball rolling on the server-side stuff
+     * 
+     * If the input display is empty, push an error message
+     *    Eventually, include a setting so the user can instead remove the last operator
+     * 
+     * If the last clicked button was decimal, clear it before submitting
+     * 
+     * I should probably increment argumentDisplayCount, but I'm not sure it's likely to be used for anything after the submit
+     */
+}
+
+// HELPER FUNCTIONS
+function decimalTailCheck(string) {
+    if (string[string.length - 1] == '.') {
+        string = clearLastChar(string)
+    }
+    return string
+}
+
+function clearLastChar(string) {
+    return string.substring(0, string.length-1)
 }

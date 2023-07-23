@@ -6,7 +6,7 @@ let serverPackage = {
     number: [],
     operator: [],
     parentheses: [],
-    answer: 
+    answer: ''
 }
 
 // Variable to hold information about the most recently selected button
@@ -37,7 +37,7 @@ function onReady() {
     $('#close-parenth-btn').on('click', closeParenthBtn)
 }
 
-// FUNCTIONS
+// HANDLER FUNCTIONS
 
 // Function that appends number (or decimal) to the input value
 function numberBtn(event){
@@ -56,16 +56,18 @@ function numberBtn(event){
         // Checking for parentheses
         if ($('#open-parenth-btn').hasClass('active-operator')) {
             openParenthCount++
-            serverPackage.parentheses.push([argumentDisplayCount])
+            console.log('adding open parenth. Argument display count is:', argumentDisplayCount)
+            serverPackage.parentheses.push([argumentDisplayCount*2])
             $('#open-parenth-btn').removeClass('active-operator')
         }
         if ($('#close-parenth-btn').hasClass('active-operator')) {
             openParenthCount--
             // For loop to find the last unresolved parenthesis and close it
-            for (let i = serverPackage.parentheses.length - 1; i > 0; i--) {
+            for (let i = serverPackage.parentheses.length - 1; i >= 0; i--) {
                 if (serverPackage.parentheses[i].length == 1) {
-                    serverPackage.parentheses[i].push(argumentDisplayCount)
-                    return // Is this return leaving the for loop, or the whole function?
+                    serverPackage.parentheses[i].push(argumentDisplayCount * 2)
+                    $('#close-parenth-btn').removeClass('active-operator')
+                    break
                 }
             }
         }
@@ -119,7 +121,6 @@ function numberBtn(event){
     lastClicked.value = clickedChar
 }
 
-// HANDLER FUNCTIONS
 function operatorBtn(event) {
     event.preventDefault()
 
@@ -217,25 +218,25 @@ function submitBtn() {
         return
     }
 
+    console.log('openParenthCount is:', openParenthCount)
     // Code to resolve any remaining open parentheses
     if (openParenthCount > 0) {
-        console.log(serverPackage.parentheses)
-        console.log(serverPackage.parentheses.length)
-        for (let i = serverPackage.parentheses.length - 1; i > 0; i--) {
-            console.log(serverPackage.parentheses[i])
-            console.log(serverPackage.parentheses[i].length)
+        console.log('parentheses property at submit button:', serverPackage.parentheses)
+        for (let i = serverPackage.parentheses.length - 1; i >= 0; i--) {
+            console.log('i is:', i)
+            console.log('parentheses[i]', serverPackage.parentheses[i])
             if (serverPackage.parentheses[i].length == 1) {
-                serverPackage.parentheses[i].push(argumentDisplayCount)
+                console.log('argumentDisplayCount is:', argumentDisplayCount)
+                serverPackage.parentheses[i].push(argumentDisplayCount * 2)
             }
         }
+        console.log('parentheses property after resolution:', serverPackage.parentheses)
     }
     $('#error-message').text('All open parentheses automatically resolved')
 
     serverPackage.number.push($('#input-display').val())
     
-    console.log('number property:', serverPackage.number)
-    console.log('operator property:', serverPackage.operator)
-    console.log('parentheses property:', serverPackage.parentheses)
+    
 
     /**
      * If the input display is a number, add it to the serverPackage and get the ball rolling on the server-side stuff
@@ -257,13 +258,12 @@ function submitBtn() {
     openParenthCount = 0
     argumentDisplayCount = 0
 
-    // Updating Calculation and Solution displays
-    $('#calculation-display').append(`
-            <p id="number-display-${argumentDisplayCount}" class="number-display">${inputScreen}</p>
-        `)
-    let calculation = $('#calculation-display').html()
-    $('#solution-display').append(calculation)
+    // Clearing the calculation display
     $('#calculation-display').empty()
+
+    console.log('number property:', serverPackage.number)
+    console.log('operator property:', serverPackage.operator)
+    console.log('parentheses property:', serverPackage.parentheses)
 
     // Post function here
     $.ajax({
@@ -294,6 +294,17 @@ function getAnswer() {
         console.log('in client-side GET', response)
         // Put get function here
             // Update the DOM
+
+        
+        // Emptying the solution display on the DOM
+        $('#solution-display').empty()
+
+        // for loop to add solution history to the DOM
+        for(let solution of response) {
+            $('#solution-display').prepend(`
+                <p>${solution.answer}</p>
+            `)
+        }
 
     }).catch((error) => {
         console.log('client-side GET error catch', error)

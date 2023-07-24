@@ -11,7 +11,7 @@ body {
 #calculator-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
     width: 50%;
     margin: auto;
 }
@@ -31,19 +31,19 @@ body {
 }
 
 .row-three {
-    grid-row: 3;
+    grid-row: 2;
 }
 
 .row-four {
-    grid-row: 4;
+    grid-row: 3;
 }
 
 .row-five {
-    grid-row: 5;
+    grid-row: 4;
 }
 
 .row-six {
-    grid-row: 6;
+    grid-row: 5;
 }
 
 .column-one {
@@ -72,24 +72,11 @@ body {
     background-color: green;
 }
 
-/* Calculation display styling */
-
-.number-display {
-    display: inline;
-}
-
-.operator-display {
-    display: inline;
-}
-
-
-/* Calculation Display Styles */
+/* CALCULATION DISPLAY STYLE*/
 
 .argument, .solution {
     display: grid;
-    grid-template-columns: repeat(10, 1ch);
     width: 10ch;
-    font-family: 'Courier New', Courier, monospace;
 }
 
 .solution {
@@ -100,37 +87,15 @@ body {
     border-top: 0px solid black;
 }
 
-.operator {
-    grid-column: 1;
-}
-
 .argument .operator {
     position: relative;
     top: 1lh;
 }
 
-.open-parenth {
-    grid-column: 2;
-}
-
 .integer {
-    grid-column: 3/6;
     justify-self: end;
 }
 
-.decimal-point {
-    grid-column: 7;
-}
-
-.decimals {
-    grid-column: 8/9;
-}
-
-.close-parenth {
-    grid-column: 10;
-}
-
-.next-line-operator {
-    display: inline;
-    white-space: nowrap;
+.problem-title {
+    font-weight: bold;
 }

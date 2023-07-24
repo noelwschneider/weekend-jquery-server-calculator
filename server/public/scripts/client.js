@@ -31,13 +31,18 @@ let argumentDisplayCount = 0
 // Variable for counting unresolved parentheses
 let openParenthCount = 0
 
+// Array for holding calculation history from DOM
+let serverHistory = []
+
+// Object for holding data from current argument in display
 let currentInput = {
-    operator: '',
-    openParenth: '',
+    operator: ' ',
+    openParenth: ' ',
+    negative: ' ',
     integer: '',
     decimalPoint: '',
     decimals: '',
-    closeParenth: ''
+    closeParenth: ' '
 }
 
 // ON-READY FUNCTION
@@ -52,6 +57,8 @@ function onReady() {
     $('#delete-btn').on('click', deleteBtn)
     $('#open-parenth-btn').on('click', openParenthBtn)
     $('#close-parenth-btn').on('click', closeParenthBtn)
+    $('#negative-btn').on('click', negativeBtn)
+    $('#solution-display').on('click', '.load-btn', loadBtn)
 }
 
 // HANDLER FUNCTIONS
@@ -70,6 +77,7 @@ function numberBtn(event){
         // Clearing uneeded tailing decimal
         inputScreen = decimalTailCheck(inputScreen)
 
+        $('#negative-btn').removeClass('active-operator')
         // Checking for parentheses
         if ($('#open-parenth-btn').hasClass('active-operator')) {
             openParenthCount++
@@ -105,8 +113,6 @@ function numberBtn(event){
         // Clearing input screen
         inputScreen = ''
     }
-    
-    
 
     // Validation to reject a second decimal point
     if (clickedChar == "." && inputScreen.includes(".") == true ) {
@@ -280,7 +286,7 @@ function submitBtn() {
     $('#error-message').text('All open parentheses automatically resolved')
 
     serverPackage.number.push($('#input-display').val())
-    
+    serverPackage.html.push(getCurrentInputHTML())
     
 
     /**
@@ -325,6 +331,46 @@ function submitBtn() {
     emptyCurrentInput()
 }
 
+function negativeBtn() {
+    if ($(this).hasClass('active-operator')) {
+        let removedNegative = $('#input-display').val()
+        removedNegative = removedNegative.substring(1)
+        $('#input-display').val(removedNegative)
+        $(this).removeClass('active-operator')
+        currentInput.negative = ' '
+    } else {
+        $('#input-display').val('-' + $('#input-display').val())
+        $(this).addClass('active-operator')
+        currentInput.negative = '-'
+    }
+
+    
+    setCalculationDisplay()
+}
+
+function loadBtn() {
+        // Empty calculation-display contents
+        $('#calculation-display').empty()
+
+        let objectToLoad
+        for (let calculation of serverHistory) {
+            if (calculation.id == $(this).parent().attr('id'))
+            objectToLoad = calculation
+        }
+
+        emptyCurrentInput()
+        serverPackage = objectToLoad
+        console.log(serverPackage)
+        setCalculationDisplay()
+
+        // Loop to append previous arguments
+        // for (let argument of objectToLoad.html) {
+        //     $('#calculation-display').append(argument)
+        // }
+    
+        // getGridSize()
+}
+
 // GET FUNCTION
 function getAnswer() {
     $.ajax({
@@ -332,19 +378,28 @@ function getAnswer() {
         url: "/getanswer"
     }).then((response) => {
         console.log('in client-side GET', response)
-        // Put get function here
-            // Update the DOM
 
+        
         
         // Emptying the solution display on the DOM
         $('#solution-display').empty()
 
+        let repetitions = 1;
         // for loop to add solution history to the DOM
         for(let solution of response) {
-            $('#solution-display').prepend(`
-                <p>${solution.answer}</p>
+            response[repetitions-1].id = `problem-history-${repetitions}`
+            $('#solution-display').append(`
+                <div id="problem-history-${repetitions}">
+                    <span class="problem-title">Problem ${repetitions}: </span>
+                    <span class="problem-solution">${solution.answer}</span>
+                    <button class="load-btn">Load</button>
+                    <div class="show-answer"></div>
+                </div>
             `)
+            repetitions++
         }
+
+        serverHistory = response
 
     }).catch((error) => {
         console.log('client-side GET error catch', error)
@@ -380,34 +435,100 @@ function setCalculationDisplay() {
     $('#calculation-display').empty()
 
     // Loop to append previous arguments
-    for (argument of serverPackage.html) {
+    for (let argument of serverPackage.html) {
         $('#calculation-display').append(argument)
     }
 
     $('#calculation-display').append(getCurrentInputHTML())
+    getGridSize()
 }
 
 function getCurrentInputHTML() {
     let currentInputHTML = `
-    <div class="argument">
-        <span class="operator">${currentInput.operator}</span>
-        <span class="open-parenth">${currentInput.openParenth}</span>
-        <span class="integer">${currentInput.integer}</span>
-        <span class="decimal-point">${currentInput.decimalPoint}</span>
-        <span class="decimals">${currentInput.decimals}</span>
-        <span class="close-parenth">${currentInput.closeParenth}</span>
+    <div id="argument-${argumentDisplayCount}" class="argument">
+        <span id="operator-${argumentDisplayCount}"class="operator">${currentInput.operator}</span>
+
+        <span id="open-parenth-${argumentDisplayCount}" class="open-parenth">${currentInput.openParenth}</span>
+
+        <span id="negative-${argumentDisplayCount}" class="negative">${currentInput.negative}</span>
+
+        <span id="integer-${argumentDisplayCount}" class="integer">${currentInput.integer}</span>
+
+        <span id="decimal-point-${argumentDisplayCount}" class="decimal-point">${currentInput.decimalPoint}</span>
+
+        <span id="decimal-${argumentDisplayCount}" class="decimals">${currentInput.decimals}</span>
+
+        <span id="close-parenth-${argumentDisplayCount}" class="close-parenth">${currentInput.closeParenth}</span>
     <div>
 `
 return currentInputHTML
 }
 
+function getGridSize() {
+    // console.log('in get grid size')
+    // Loop to determine largest integer in calculation
+    let integerLength = 1;
+    for (let integer of serverPackage.number) {
+        let removedDecimals = Math.round(integer)
+        // console.log('current integer is:', removedDecimals)
+        if (removedDecimals.toString().length > integerLength) {
+            integerLength = removedDecimals.toString().length;
+        }
+    }
+
+    let removedDecimals = currentInput.integer
+    // console.log(`current display is: ${removedDecimals}`)
+    // console.log('integer size of current display is:', removedDecimals.length)
+    if (removedDecimals.length > integerLength) {
+        integerLength = removedDecimals.length
+    }
+
+    let decimalLength = 0
+    for (let integer of serverPackage.number) {
+        // console.log('integer is:', integer)
+        let removedInteger = integer.substring(integer.indexOf('.')+1)
+        // console.log('removed integer is:', removedInteger)
+        if (removedInteger.toString().length > decimalLength) {
+            // console.log('removed integer legnth is:', removedInteger.toString().length)
+            decimalLength = removedInteger.toString().length
+            // console.log('new decimal length is:', decimalLength)
+        }
+    }
+    let removedInteger = currentInput.decimals
+    if (removedInteger.length > decimalLength) {
+        decimalLength = removedInteger.length
+        // console.log('new gecimal length is:', decimalLength)
+    }
+
+    let decimalPoint = 0
+    if (decimalLength > 0 || currentInput.decimalPoint == '.') {
+        decimalPoint = 1
+    }
+
+    // console.log('integerLength is:', integerLength)
+    // console.log('decimalLength is:', decimalLength)
+    // console.log('decimalPoint is:', decimalPoint)
+
+    $('.argument').css('grid-template-columns', `repeat(${4 + integerLength + decimalLength + decimalPoint}, 1ch`)
+    $('.operator').css('grid-column', '1/1')
+    $('.open-parenth').css('grid-column', '2/2')
+    $('.negative').css('grid-column', '3/3')
+    $('.integer').css('grid-column', `4/${integerLength + 3}`)
+    $('.decimal-point').css('grid-column', `${integerLength + decimalPoint + 3}/${integerLength + decimalPoint + 3}`)
+    $('.decimals').css('grid-column',  `${integerLength + decimalPoint + 4}/${integerLength + decimalPoint + decimalLength + 3}`)
+    $('.close-parenth').css('grid-column', `${integerLength + decimalLength + 5}`)
+
+    return
+}
+
 function emptyCurrentInput() {
-    currentInput.operator = ''
-        currentInput.openParenth = ''
-        currentInput.integer = ''
-        currentInput.decimalPoint = ''
-        currentInput.decimals = ''
-        currentInput.closeParenth = ''
+    currentInput.operator = ' '
+    currentInput.openParenth = ' '
+    currentInput.negative = ' '
+    currentInput.integer = ' '
+    currentInput.decimalPoint = ''
+    currentInput.decimals = ''
+    currentInput.closeParenth = ''
 }
 
 function resetServerPackage() {

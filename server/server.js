@@ -12,6 +12,14 @@ let calculationHistory = []
 // Get function
 app.get('/getanswer', (req, res) => {
     console.log('in server-side GET')
+
+    for (let i = 0; i < calculationHistory.length; i++) {
+        console.log('converting', calculationHistory[i])
+        for (let x = 0; x < calculationHistory[i].number.length; x++) {
+            calculationHistory[i].number[x] = toString(calculationHistory[i].number[x])
+            console.log(calculationHistory[i].number[x])
+        }
+    }
     res.send(calculationHistory)
 })
 

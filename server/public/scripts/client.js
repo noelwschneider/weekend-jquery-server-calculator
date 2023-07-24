@@ -6,7 +6,16 @@ let serverPackage = {
     number: [],
     operator: [],
     parentheses: [],
-    answer: ''
+    answer: '',
+    html: [],
+    settings: {
+        decimalPlaces: 2,
+        operators: {
+            multiplication: '*',
+            division: '÷',
+            exponent: '^'
+        }
+    }
 }
 
 // Variable to hold information about the most recently selected button
@@ -22,6 +31,14 @@ let argumentDisplayCount = 0
 // Variable for counting unresolved parentheses
 let openParenthCount = 0
 
+let currentInput = {
+    operator: '',
+    openParenth: '',
+    integer: '',
+    decimalPoint: '',
+    decimals: '',
+    closeParenth: ''
+}
 
 // ON-READY FUNCTION
 function onReady() {
@@ -56,7 +73,7 @@ function numberBtn(event){
         // Checking for parentheses
         if ($('#open-parenth-btn').hasClass('active-operator')) {
             openParenthCount++
-            console.log('adding open parenth. Argument display count is:', argumentDisplayCount)
+            // console.log('adding open parenth. Argument display count is:', argumentDisplayCount)
             serverPackage.parentheses.push([argumentDisplayCount*2])
             $('#open-parenth-btn').removeClass('active-operator')
         }
@@ -72,15 +89,14 @@ function numberBtn(event){
             }
         }
 
-        // Pushing number and operator to server package
+        // Pushing number, operator, and HTML to server package
         serverPackage.number.push(inputScreen)
         serverPackage.operator.push(lastClicked.value)
-
-        // Updating display section
-        $('#calculation-display').append(`
-            <p id="number-display-${argumentDisplayCount}" class="number-display">${inputScreen}</p>
-            <p id="operator-display-${argumentDisplayCount}" class="operator-display">${lastClicked.value}</p>
-        `)
+        serverPackage.html.push(getCurrentInputHTML())
+        $('#calculation-display').empty()
+        emptyCurrentInput()
+        
+        // Deactivating last operator
         $('.active-operator').removeClass('active-operator')
 
         // Updating argument display counter
@@ -90,6 +106,8 @@ function numberBtn(event){
         inputScreen = ''
     }
     
+    
+
     // Validation to reject a second decimal point
     if (clickedChar == "." && inputScreen.includes(".") == true ) {
         $('#error-message').text("Input cannot include multiple decimal points")
@@ -111,6 +129,17 @@ function numberBtn(event){
         inputScreen = ''
     }
 
+    // conditional to update current input object
+    if (clickedChar == '.') {
+        currentInput.decimalPoint = '.'
+    } else if (inputScreen.includes('.')) {
+        currentInput.decimals += clickedChar
+    } else {
+        currentInput.integer += clickedChar
+    }
+
+    $('#calculation-display').append(setCalculationDisplay)
+
     $('#error-message').text('')
     inputScreen += clickedChar
     // console.log(inputScreen)
@@ -131,12 +160,16 @@ function operatorBtn(event) {
         $(this).removeClass('active-operator')
         lastClicked.type = ''
         lastClicked.value = ''
+        currentInput.operator = ''
     } else {
         $('.operator-btn').removeClass('active-operator')
         $(this).addClass('active-operator')
         lastClicked.type = 'operator'
         lastClicked.value = clickedChar
+        currentInput.operator = clickedChar
     }
+
+    setCalculationDisplay();
 }
 
 function clearBtn() {
@@ -145,35 +178,42 @@ function clearBtn() {
         // And a setting to disable that
     if ($('#input-display').val() === '') {
         $('#calculation-display').empty()
-        serverPackage.number = []
-        serverPackage.operator = []
-        serverPackage.parentheses = []
+        resetServerPackage()
         argumentDisplayCount = 0
         openParenthCount = 0
     } else {
         $('#input-display').val('')
+        emptyCurrentInput()
     }
 
     $('#error-message').text('')
     $('.operator-btn').removeClass('active-operator')
     $('.parenth-btn').removeClass('active-operator')
+
+    setCalculationDisplay()
 }
 
 function deleteBtn() {
     let string = clearLastChar($('#input-display').val())
     $('#input-display').val(string)
+    setCalculationDisplay()
 }
 
 function openParenthBtn() {
     if ($(this).hasClass('active-operator')) {
         $(this).removeClass('active-operator')
+        currentInput.openParenth = ''
     } else {
         $(this).addClass('active-operator')
+        currentInput.openParenth = '('
     }
 
     if ($('#close-parenth-btn').hasClass('active-operator')) {
-        $('#close-parenth-btn').removeClass('active-operator')    
+        $('#close-parenth-btn').removeClass('active-operator')   
+        currentInput.closeParenth = '' 
     }
+
+    setCalculationDisplay()
 }
 
 function closeParenthBtn() {
@@ -184,17 +224,22 @@ function closeParenthBtn() {
 
     if ($(this).hasClass('active-operator')) {
         $(this).removeClass('active-operator')
+        currentInput.closeParenth = ''
     } else {
         $(this).addClass('active-operator')
+        currentInput.closeParenth = ')'
     }
 
     if ($('#open-parenth-btn').hasClass('active-operator')) {
-        $('#open-parenth-btn').removeClass('active-operator')    
+        $('#open-parenth-btn').removeClass('active-operator')
+        currentInput.openParenth = '' 
     }
+
+    setCalculationDisplay()
 }
 
 function submitBtn() {
-    console.log('in submitBtn')
+    // console.log('in submitBtn')
     
     let inputScreen = $('#input-display').val()
     // Validation to prevent submitting without at least one operator
@@ -218,19 +263,19 @@ function submitBtn() {
         return
     }
 
-    console.log('openParenthCount is:', openParenthCount)
+    // console.log('openParenthCount is:', openParenthCount)
     // Code to resolve any remaining open parentheses
     if (openParenthCount > 0) {
-        console.log('parentheses property at submit button:', serverPackage.parentheses)
+        // console.log('parentheses property at submit button:', serverPackage.parentheses)
         for (let i = serverPackage.parentheses.length - 1; i >= 0; i--) {
-            console.log('i is:', i)
-            console.log('parentheses[i]', serverPackage.parentheses[i])
+            // console.log('i is:', i)
+            // console.log('parentheses[i]', serverPackage.parentheses[i])
             if (serverPackage.parentheses[i].length == 1) {
-                console.log('argumentDisplayCount is:', argumentDisplayCount)
+                // console.log('argumentDisplayCount is:', argumentDisplayCount)
                 serverPackage.parentheses[i].push(argumentDisplayCount * 2)
             }
         }
-        console.log('parentheses property after resolution:', serverPackage.parentheses)
+        // console.log('parentheses property after resolution:', serverPackage.parentheses)
     }
     $('#error-message').text('All open parentheses automatically resolved')
 
@@ -261,10 +306,6 @@ function submitBtn() {
     // Clearing the calculation display
     $('#calculation-display').empty()
 
-    console.log('number property:', serverPackage.number)
-    console.log('operator property:', serverPackage.operator)
-    console.log('parentheses property:', serverPackage.parentheses)
-
     // Post function here
     $.ajax({
         method: "POST",
@@ -280,9 +321,8 @@ function submitBtn() {
     // Get function here
     getAnswer()
     // Clear out object
-    serverPackage.number = []
-    serverPackage.operator = []
-    serverPackage.parentheses = []
+    resetServerPackage()
+    emptyCurrentInput()
 }
 
 // GET FUNCTION
@@ -321,5 +361,58 @@ function decimalTailCheck(string) {
 }
 
 function clearLastChar(string) {
+    let deletedChar = string.substring(string.length)
+
+    // Updating currentInput object
+    if (deletedChar == '.') {
+        currentInput.decimalPoint = ''
+    } else if (string.includes('.')) {
+        currentInput.decimals = currentInput.decimals.substring(0, currentInput.decimals.length-1)
+    } else {
+        currentInput.integer = currentInput.integer.substring(0, currentInput.integer.length-1)
+    }
+
     return string.substring(0, string.length-1)
+}
+
+function setCalculationDisplay() {
+    // Empty calculation-display contents
+    $('#calculation-display').empty()
+
+    // Loop to append previous arguments
+    for (argument of serverPackage.html) {
+        $('#calculation-display').append(argument)
+    }
+
+    $('#calculation-display').append(getCurrentInputHTML())
+}
+
+function getCurrentInputHTML() {
+    let currentInputHTML = `
+    <div class="argument">
+        <span class="operator">${currentInput.operator}</span>
+        <span class="open-parenth">${currentInput.openParenth}</span>
+        <span class="integer">${currentInput.integer}</span>
+        <span class="decimal-point">${currentInput.decimalPoint}</span>
+        <span class="decimals">${currentInput.decimals}</span>
+        <span class="close-parenth">${currentInput.closeParenth}</span>
+    <div>
+`
+return currentInputHTML
+}
+
+function emptyCurrentInput() {
+    currentInput.operator = ''
+        currentInput.openParenth = ''
+        currentInput.integer = ''
+        currentInput.decimalPoint = ''
+        currentInput.decimals = ''
+        currentInput.closeParenth = ''
+}
+
+function resetServerPackage() {
+    serverPackage.number = []
+    serverPackage.operator = []
+    serverPackage.parentheses = []
+    serverPackage.html = []
 }

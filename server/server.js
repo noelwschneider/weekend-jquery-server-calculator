@@ -18,7 +18,7 @@ app.get('/getanswer', (req, res) => {
 // Post function
 app.post('/submitcalculation', (req, res) => {
     console.log('In server-side POST')
-    console.log('State of object on arrival to server:', req.body)
+    // console.log('State of object on arrival to server:', req.body)
     let userCalculation = req.body
     userCalculation.answer = doMath(req.body)
 
@@ -32,7 +32,7 @@ app.post('/submitcalculation', (req, res) => {
 // FUNCTIONS FOR DOING MATH
 // Function to take the object and return it as a single array representing a math problem
 let getCalcAsArray = (object) => {
-    console.log('in getCalcAsArray')
+    // console.log('in getCalcAsArray')
     let calculation = []
     // Pushing the first number to the array because it will always begin and end with a number
     calculation.push(object.number[0])
@@ -43,7 +43,7 @@ let getCalcAsArray = (object) => {
         calculation.push(object.number[i+1])
     }
     // console.log(calculation)
-    console.log('exiting getCalcAsArray')
+    // console.log('exiting getCalcAsArray')
     return calculation
 }
 
@@ -61,7 +61,7 @@ let orderOfOperations = (calculation) => {
         // Splice in new math, replacing old numbers and operators until the final calculation is the only remaining value
     // For loops that 
 
-    console.log('beginning calculationDoer sequence')
+    // console.log('beginning calculationDoer sequence')
     // console.log('doing calculations for exponents')
     calculationDoer(calculation, '**')
     // console.log('doing calculations for multiplication')
@@ -73,33 +73,33 @@ let orderOfOperations = (calculation) => {
     // console.log('doing calculations for subtraction')
     calculationDoer(calculation, '-')
 
-    console.log('return value of orderOfOperations is:', calculation[0])
+    // console.log('return value of orderOfOperations is:', calculation[0])
     return calculation[0]
 }
 
 let parenthesesCheck = (calculation, object) => {
-    console.log('in parentheses check')
-    console.log('parentheses property:', object.parentheses)
+    // console.log('in parentheses check')
+    // console.log('parentheses property:', object.parentheses)
     
     // Valdiation to avoid error from calculations without parentheses
     if(object.parentheses == undefined) {
-        console.log('No parentheses in calculation. Exiting parentheses check.')
-        console.log('')
+        // console.log('No parentheses in calculation. Exiting parentheses check.')
+        // console.log('')
         return calculation
     }
 
     for (let i = 0; i < object.parentheses.length; i++) {
-        console.log('index of opening parenth:', object.parentheses[i][0])
-        console.log('index of closing parenth:', object.parentheses[i][1])
+        // console.log('index of opening parenth:', object.parentheses[i][0])
+        // console.log('index of closing parenth:', object.parentheses[i][1])
         let openParenth = object.parentheses[i][0]
         let closeParenth = (object.parentheses[i][1] - openParenth) * 2 // multiplied by two to account for operators between numbers
         // console.log('parentheses length is:', closeParenth)                          // could also potentially use .slice() on object.numbers? Not sure there is much difference
         let calculationArgument = calculation.splice(openParenth, closeParenth+1)
-        console.log('argument to operate on:', calculationArgument)
+        // console.log('argument to operate on:', calculationArgument)
         calculation.splice(openParenth, 0, orderOfOperations(calculationArgument))
     }
-    console.log('exiting parentheses check')
-    console.log('')
+    // console.log('exiting parentheses check')
+    // console.log('')
     return calculation
 }
 
@@ -197,42 +197,85 @@ let calculationDoer = (calculation, operator) => {
 
 // Function to format object.number array properties as numbers
 let convertToNumber = (object) => {
-    console.log('in convertToNumber')
+    // console.log('in convertToNumber')
     let newNumberArray = []
     for (let number of object.number) {
-        console.log('destring number:', number)
+        // console.log('destring number:', number)
         newNumberArray.push(Number(number))
     }
     object.number = newNumberArray
-    console.log('object.number after destringing:', object.number)
-    console.log('')
+    // console.log('object.number after destringing:', object.number)
+    // console.log('')
+}
+
+let convertOperatorsForMath = (object) => {
+    let newOperatorArray = []
+    for (let operator of object.operator) {
+        if (operator == 'x' || operator == '•') {
+            operator = "*"
+            console.log('new operator:', operator)
+        } else if (operator == '^') {
+            operator = "**"
+            console.log('new operator:', operator)
+        } else if (operator == '÷') {
+            operator = "/"
+            console.log('new operator:', operator)
+        }
+        newOperatorArray.push(operator)
+    }
+    object.operator = newOperatorArray
+}
+
+let convertOperatorsForPresentation = (object) => {
+    let newOperatorArray = []
+    for (let operator of object.operator) {
+        if (operator == 'x' || operator == '•' || operator == '*') {
+            operator = object.settings.operators.multiplication
+            console.log('new operator:', operator)
+        } else if (operator == '^' || operator == '**') {
+            operator = object.settings.operators.exponent
+            console.log('new operator:', operator)
+        } else if (operator == '÷' || operator == '/') {
+            operator = object.settings.operators.division
+            console.log('new operator:', operator)
+        }
+        newOperatorArray.push(operator)
+    }
+    object.operator = newOperatorArray
 }
 
 // Function to do the math and return the value
 let doMath = (object) => {
-    console.log('in doMath')
-    console.log('')
+    // console.log('in doMath')
+    // console.log('')
 
     // De-stringing object.number array properties
     convertToNumber(object)
-    console.log('current state of object:', object)
+    convertOperatorsForMath(object)
+    console.log('object after modifying operators:', object)
+    // console.log('current state of object:', object)
 
     // Merging numbers and operators
     let calculation = getCalcAsArray(object)
     
-    console.log('current state of calculation:', calculation)
-    console.log('')
+    // console.log('current state of calculation:', calculation)
+    // console.log('')
 
     calculation = parenthesesCheck(calculation, object)
 
-    console.log('current state of object:', object)
+    // console.log('current state of object:', object)
 
-    console.log('current state of calculation:', calculation)
+    // console.log('current state of calculation:', calculation)
     calculation = orderOfOperations(calculation, object)
-    console.log('exiting doMath. Current value is:', calculation)
+    // console.log('exiting doMath. Current value is:', calculation)
 
-    return calculation;
+    // Converting operators back to user preference for display
+    convertOperatorsForPresentation(object)
+    // Return the calculated number, rounded to the decimal-place settings (default is 2)
+    return calculation.toFixed(object.settings.decimalPlaces);
 }
+
+
 
 app.listen(port, () => {
     console.log('listening on port', port)

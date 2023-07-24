@@ -59,6 +59,9 @@ function onReady() {
     $('#close-parenth-btn').on('click', closeParenthBtn)
     $('#negative-btn').on('click', negativeBtn)
     $('#solution-display').on('click', '.load-btn', loadBtn)
+    $('#input-display').on('keypress', inputDisplay)
+
+    getAnswer()
 }
 
 // HANDLER FUNCTIONS
@@ -363,12 +366,80 @@ function loadBtn() {
         console.log(serverPackage)
         setCalculationDisplay()
 
-        // Loop to append previous arguments
-        // for (let argument of objectToLoad.html) {
-        //     $('#calculation-display').append(argument)
-        // }
+        
+}
+
+function inputDisplay(event) {
+    console.log('in input display', event.originalEvent.key)
+    console.log(event)
+
+    event.preventDefault()
+    let pressedKey = event.originalEvent.key
+
+    if (pressedKey == 0) {
+        $(`#0-btn`).trigger('click')
+
+    } else if (pressedKey == 1) {
+        $(`#1-btn`).trigger('click')
+
+    } else if (pressedKey == 2) {
+        $(`#2-btn`).trigger('click')
+
+    } else if (pressedKey == 3) {
+        $(`#3-btn`).trigger('click')
+
+    } else if (pressedKey == 4) {
+        $(`#4-btn`).trigger('click')
+
+    } else if (pressedKey == 5) {
+        $(`#5-btn`).trigger('click')
+
+    } else if (pressedKey == 6) {
+        $(`#6-btn`).trigger('click')
+
+    } else if (pressedKey == 7) {
+        $(`#7-btn`).trigger('click')
+
+    } else if (pressedKey == 8) {
+        $(`#8-btn`).trigger('click')
+
+    } else if (pressedKey == 9) {
+        $(`#9-btn`).trigger('click')
+
+    } else if (pressedKey == '+') {
+        $(`#add-btn`).trigger('click')
+
+    } else if (pressedKey == '-') {
+        $(`#subtract-btn`).trigger('click')
+
+    } else if (pressedKey == '/') {
+        $(`#divide-btn`).trigger('click')
+
+    } else if (pressedKey == 'Enter') {
+        $(`#submit-btn`).trigger('click')
+
+    } else if (pressedKey == '^') {
+        $(`#exponent-btn`).trigger('click')
+
+    } else if (pressedKey == '.') {
+        $(`#decimal-btn`).trigger('click')
+
+    } else if (pressedKey == '(') {
+        $(`#open-parenth-btn`).trigger('click')
+
+    } else if (pressedKey == ')') {
+        $(`#close-parenth-btn`).trigger('click')
+
+    } else if (pressedKey == 'Backspace') {
+        $(`#delete-btn`).trigger('click')
+
+    } else if (pressedKey === '*' || 'x') {
+        $(`#multiply-btn`).trigger('click')
+
+    } 
+
+    setCalculationDisplay()
     
-        // getGridSize()
 }
 
 // GET FUNCTION
